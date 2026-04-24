@@ -1,5 +1,9 @@
 # OMG (oh-my-gemini)
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repo-181717?logo=github&logoColor=white)](https://github.com/daniel-silva-perez/oh-my-gemini)
+[![GitLab Repo](https://img.shields.io/badge/GitLab-Repo-FC6D26?logo=gitlab&logoColor=white)](https://gitlab.com/danielsilvaperez/oh-my-gemini)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+
 OMG is a workflow/runtime layer for Gemini CLI.
 
 It aims to make day-to-day Gemini usage feel closer to the operator ergonomics of oh-my-codex / oh-my-claudecode:
