@@ -38,7 +38,11 @@ export class GeminiRunner {
   }
 
   async runInteractive(mode: OmgMode, extraArgs: string[] = [], cwd = this.paths.projectRoot): Promise<number> {
-    return await spawnInteractive('gemini', extraArgs, {
+    const args = [...extraArgs];
+    if (mode === 'madmax' || mode === 'high') {
+      args.push('-y');
+    }
+    return await spawnInteractive('gemini', args, {
       cwd,
       env: this.buildEnv(mode),
     });
@@ -46,9 +50,13 @@ export class GeminiRunner {
 
   async runPrompt(prompt: string, options: GeminiPromptOptions): Promise<CommandResult> {
     const retries = options.retries ?? 0;
+    const extraArgs = [...(options.extraArgs ?? [])];
+    if (options.mode === 'madmax' || options.mode === 'high') {
+      extraArgs.push('-y');
+    }
     let attempt = 0;
     while (true) {
-      const result = await runCommand('gemini', ['-p', prompt, ...(options.extraArgs ?? [])], {
+      const result = await runCommand('gemini', ['-p', prompt, ...extraArgs], {
         cwd: options.cwd ?? this.paths.projectRoot,
         env: this.buildEnv(options.mode),
       });

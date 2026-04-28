@@ -5,9 +5,10 @@ export interface ModeSelection {
   tmux: boolean;
 }
 
-export function selectMode(options: { smart?: boolean; madmax?: boolean; high?: boolean; tmux?: boolean }): ModeSelection {
+export function selectMode(options: { smart?: boolean; madmax?: boolean; high?: boolean; tmux?: boolean; noTmux?: boolean }): ModeSelection {
   const mode: OmgMode = options.high ? 'high' : options.madmax ? 'madmax' : 'smart';
-  return { mode, tmux: Boolean(options.tmux) };
+  const tmux = options.noTmux ? false : true;
+  return { mode, tmux };
 }
 
 export function modeInstructions(mode: OmgMode): string {

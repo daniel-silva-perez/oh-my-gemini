@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { isNonTrivialTask, selectMode } from '../modes.js';
 
 test('selectMode chooses high over madmax', () => {
-  assert.deepEqual(selectMode({ madmax: true, high: true }), { mode: 'high', tmux: false });
+  assert.deepEqual(selectMode({ madmax: true, high: true }), { mode: 'high', tmux: true });
 });
 
 test('isNonTrivialTask detects multi-step asks', () => {

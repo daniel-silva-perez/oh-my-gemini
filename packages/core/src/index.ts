@@ -21,3 +21,4 @@ export * from './team-progress.js';
 export * from './team-controller.js';
 export * from './team-loop.js';
 export * from './ralph-runtime.js';
+export * from './utils/tmux.js';

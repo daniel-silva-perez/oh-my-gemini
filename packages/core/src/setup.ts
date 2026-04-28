@@ -44,10 +44,11 @@ async function readLinkStatus(paths: OmgPaths, extensionMirror: string): Promise
   if (await pathExists(linkedExtensionPath)) {
     try {
       const resolvedLink = await realpath(linkedExtensionPath);
-      linkOk = resolvedLink === extensionMirror;
+      const resolvedMirror = await realpath(extensionMirror);
+      linkOk = resolvedLink === resolvedMirror;
       detail = linkOk
         ? `Gemini CLI extension linked at ${linkedExtensionPath}`
-        : `Gemini CLI points to ${resolvedLink}; expected ${extensionMirror}. Re-run: gemini extensions link ${extensionMirror}`;
+        : `Gemini CLI points to ${resolvedLink}; expected ${resolvedMirror}. Re-run: gemini extensions link ${extensionMirror}`;
     } catch (error) {
       detail = `Unable to inspect Gemini CLI link at ${linkedExtensionPath}: ${(error as Error).message}`;
     }

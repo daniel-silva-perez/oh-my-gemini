@@ -88,7 +88,7 @@ exit 1
     assert.equal(linkCheck?.ok, true);
 
     const linkedTarget = await realpath(join(homeDir, '.gemini', 'extensions', 'oh-my-gemini'));
-    assert.equal(linkedTarget, join(paths.globalHomeDir, 'extension'));
+    assert.equal(linkedTarget, await realpath(join(paths.globalHomeDir, 'extension')));
 
     const helperScript = await readFile(join(paths.globalHomeDir, 'link-extension.sh'), 'utf8');
     assert.match(helperScript, /gemini extensions link/);

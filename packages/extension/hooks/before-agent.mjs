@@ -15,6 +15,8 @@ if (mode === 'high') {
 } else {
   extra += 'Use lightweight planning when the task is non-trivial and verify important changes. ';
 }
+extra += '\n\n**REMINDER: You are operating under the Sisyphus Protocol.** Verbalize intent before acting ("I detect [intent]... My approach: [approach]"). Do not implement unless explicitly requested. Delegate complex tasks to sub-agents (generalist, codebase_investigator).';
+
 const planPath = path.join(projectOmg, 'plan-current.md');
 const testSpecPath = path.join(projectOmg, 'test-spec-current.md');
 const notepadPath = path.join(projectOmg, 'notepad.md');

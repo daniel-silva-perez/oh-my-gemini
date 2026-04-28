@@ -19,6 +19,7 @@ import { isNonTrivialTask, selectMode } from '../../core/src/modes.js';
 import { autofixTeam, renderTeamStatus, resumeTeam, runTeamLoop, runTeamWorker, shutdownTeam, startTeam, startTeamFixPass } from '../../core/src/team.js';
 import { appendJsonl, writeText } from '../../core/src/utils/fs.js';
 import { shellQuote } from '../../core/src/utils/process.js';
+import { setupTmuxHud } from '../../core/src/utils/tmux.js';
 
 function printChecks(checks: Array<{ name: string; ok: boolean; detail: string; severity?: string }>) {
   for (const check of checks) {
@@ -36,18 +37,30 @@ export async function runCli(argv = process.argv): Promise<void> {
     .option('--smart', 'run in smart mode')
     .option('--madmax', 'run in madmax mode')
     .option('--high', 'run in high mode (ralph loop)')
-    .option('--tmux', 'launch in detached tmux session')
+    .option('--tmux', 'launch in detached tmux session (default)')
+    .option('--no-tmux', 'do not use tmux HUD')
     .argument('[task...]')
-    .action(async (taskArgs: string[], options: { smart?: boolean; madmax?: boolean; high?: boolean; tmux?: boolean }) => {
+    .action(async (taskArgs: string[], options: { smart?: boolean; madmax?: boolean; high?: boolean; tmux?: boolean; noTmux?: boolean }) => {
       const paths = resolveOmgPaths(process.cwd());
       const context = new OmgContext(paths);
       await context.ensureLayout();
       const { mode, tmux } = selectMode(options);
       const task = taskArgs.join(' ').trim();
-      if (tmux) {
+
+      // If already in tmux and didn't explicitly ask for a new session, just run normally
+      // but maybe we should still setup the HUD for the current session.
+      const alreadyInTmux = !!process.env.TMUX;
+      
+      if (tmux && !alreadyInTmux) {
         await launchTmux(paths, mode, task);
         return;
       }
+      
+      if (alreadyInTmux && !options.noTmux) {
+        // We are already in tmux, so just setup the HUD for the current session
+        await setupTmuxHud({ task, mode });
+      }
+
       if (!task) {
         await context.startSession({
           sessionId: `omg-${Date.now()}`,
@@ -228,15 +241,16 @@ async function launchTmux(paths: ReturnType<typeof resolveOmgPaths>, mode: 'smar
   const entry = shellQuote(paths.cliEntrypoint);
   const safeProjectRoot = shellQuote(paths.projectRoot);
   const modeFlag = mode === 'madmax' ? '--madmax ' : '';
+  const yoloFlag = (mode === 'madmax' || mode === 'high') ? ' -y' : '';
   const script = task
     ? `#!/usr/bin/env bash\nset -euo pipefail\ncd -- ${safeProjectRoot}\nexec node ${entry} ${mode === 'high' ? 'ralph ' : modeFlag}${shellQuote(task)}\n`
-    : `#!/usr/bin/env bash\nset -euo pipefail\ncd -- ${safeProjectRoot}\nexec env OMG_MODE=${shellQuote(mode)} OMG_HOME=${shellQuote(paths.globalHomeDir)} OMG_PROJECT_DIR=${safeProjectRoot} GEMINI_PROJECT_DIR=${safeProjectRoot} gemini\n`;
+    : `#!/usr/bin/env bash\nset -euo pipefail\ncd -- ${safeProjectRoot}\nexec env OMG_MODE=${shellQuote(mode)} OMG_HOME=${shellQuote(paths.globalHomeDir)} OMG_PROJECT_DIR=${safeProjectRoot} GEMINI_PROJECT_DIR=${safeProjectRoot} gemini${yoloFlag}\n`;
   await writeText(scriptPath, script);
   await appendJsonl(join(paths.projectOmgDir, 'logs', 'tmux.jsonl'), { at: new Date().toISOString(), mode, task, scriptPath });
-  await runTaskTmux(scriptPath, `omg-${mode}-${Date.now()}`);
+  await runTaskTmux(scriptPath, `omg-${mode}-${Date.now()}`, { task, mode });
 }
 
-async function runTaskTmux(scriptPath: string, sessionName: string): Promise<void> {
+async function runTaskTmux(scriptPath: string, sessionName: string, options: { task: string, mode: string }): Promise<void> {
   const { chmod } = await import('node:fs/promises');
   const { runCommand } = await import('../../core/src/utils/process.js');
   await chmod(scriptPath, 0o755);
@@ -244,6 +258,13 @@ async function runTaskTmux(scriptPath: string, sessionName: string): Promise<voi
   if (result.code !== 0) {
     throw new Error(result.stderr || result.stdout || 'Failed to create tmux session');
   }
+
+  await setupTmuxHud({
+    sessionName,
+    task: options.task,
+    mode: options.mode,
+  });
+
   console.log(`tmux session started: ${sessionName}`);
   console.log(`attach with: tmux attach -t ${sessionName}`);
 }

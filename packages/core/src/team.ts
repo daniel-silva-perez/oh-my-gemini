@@ -12,6 +12,7 @@ import { appendTraceEvent } from './trace.js';
 import { parseGeminiJsonPayload } from './utils/json.js';
 import { appendJsonl, ensureDir, isPathInside, readJson, slugify, tailFile, writeJson, writeText } from './utils/fs.js';
 import { runCommand, shellQuote, spawnInteractive } from './utils/process.js';
+import { setupTmuxHud } from './utils/tmux.js';
 
 const WORKER_RESULT_SCHEMA = z.object({
   summary: z.string(),
@@ -279,6 +280,11 @@ async function startTeamInternal(paths: OmgPaths, spec: string, task: string, op
       if (result.code !== 0) {
         throw new Error(`Failed to start tmux team session: ${result.stderr || result.stdout}`);
       }
+      await setupTmuxHud({
+        sessionName,
+        task,
+        mode: 'team',
+      });
       first = false;
     } else {
       const result = await runCommand('tmux', ['split-window', '-t', sessionName, '-c', paths.projectRoot, launcher]);

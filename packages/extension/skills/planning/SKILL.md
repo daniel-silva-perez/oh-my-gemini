@@ -13,3 +13,7 @@ When invoked:
 3. Break the work into bounded steps.
 4. Assign verification commands or checks.
 5. Save durable artifacts under `.omg/plans/` when the workflow supports it.
+
+**Sisyphus Protocol Note:**
+As an orchestrator, ensure the plan identifies which steps should be delegated to sub-agents (e.g., batch refactoring to `generalist`, deep analysis to `codebase_investigator`) rather than doing everything yourself.
+
