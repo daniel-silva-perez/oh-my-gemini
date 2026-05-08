@@ -2,6 +2,7 @@
   "name": "@danielsilvaperez/oh-my-gemini",
   "version": "0.0.0",
   "description": "Workflow/runtime layer and extension bundle for Gemini CLI",
+  "author": "Daniel Silva Perez",
   "license": "MIT",
   "repository": {
     "type": "git",

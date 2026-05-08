@@ -217,7 +217,8 @@ export async function runCli(argv = process.argv): Promise<void> {
       readline.cursorTo(process.stdout, 0, 0);
       readline.clearScreenDown(process.stdout);
       console.log(await renderHud(paths));
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const HUD_REFRESH_INTERVAL_MS = 1200;
+      await new Promise((resolve) => setTimeout(resolve, HUD_REFRESH_INTERVAL_MS));
     }
   });
 

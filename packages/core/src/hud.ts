@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import type { OmgPaths, TeamManifest } from './types.js';
+import type { GeneratedPlan, GeneratedTestSpec, ModeRuntimeState, OmgPaths, PlanStep, RalphState, SessionState, TeamManifest } from './types.js';
 import { readOperatorSummary, readRecentProjectSessions } from './session-history.js';
 import { readModeState } from './state.js';
 import { readRecentTrace } from './trace.js';
@@ -14,15 +14,15 @@ function renderProgressBar(current: number, total: number, width = 20): string {
 }
 
 export async function renderHud(paths: OmgPaths): Promise<string> {
-  const session = await readJson<any>(join(paths.projectOmgDir, 'session.json'), null);
-  const mode = await readJson<any>(join(paths.projectOmgDir, 'mode.json'), null);
-  const ralphArtifact = await readJson<any>(join(paths.projectArtifactsDir, 'ralph-state.json'), null);
-  const plan = await readJson<any>(paths.projectCurrentPlanJsonPath, null);
-  const testSpec = await readJson<any>(paths.projectCurrentTestSpecJsonPath, null);
+  const session = await readJson<SessionState | null>(join(paths.projectOmgDir, 'session.json'), null);
+  const mode = await readJson<ModeRuntimeState | null>(join(paths.projectOmgDir, 'mode.json'), null);
+  const ralphArtifact = await readJson<RalphState | null>(join(paths.projectArtifactsDir, 'ralph-state.json'), null);
+  const plan = await readJson<GeneratedPlan | null>(paths.projectCurrentPlanJsonPath, null);
+  const testSpec = await readJson<GeneratedTestSpec | null>(paths.projectCurrentTestSpecJsonPath, null);
   const teamEntries = await listFiles(paths.projectTeamDir);
   const totalSteps = Array.isArray(plan?.steps) ? plan.steps.length : 0;
-  const completedSteps = Array.isArray(plan?.steps) ? plan.steps.filter((step: any) => step.status === 'completed').length : 0;
-  const activeStep = plan?.steps?.find?.((step: any) => step.status !== 'completed') ?? null;
+  const completedSteps = Array.isArray(plan?.steps) ? plan.steps.filter((step: PlanStep) => step.status === 'completed').length : 0;
+  const activeStep = plan?.steps?.find?.((step: PlanStep) => step.status !== 'completed') ?? null;
   const planState = await readModeState(paths, 'plan');
   const ralphState = await readModeState(paths, 'ralph');
   const teamState = await readModeState(paths, 'team');
@@ -32,6 +32,10 @@ export async function renderHud(paths: OmgPaths): Promise<string> {
   const lastSession = recentSessions[0];
   const operatorSummary = await readOperatorSummary(paths);
   const ralph = ralphArtifact ?? ralphState;
+  const ralphStatus = ralphArtifact?.status ?? (ralphState?.active ? 'running' : 'idle');
+  const ralphPhase = ralph?.currentPhase ?? '-';
+  const ralphIteration = ralphArtifact?.iteration ?? '-';
+  const ralphMaxIterations = ralphArtifact?.maxIterations;
 
   const lines = [
     '\x1b[1m\x1b[36m=== OMG HUD ===\x1b[0m',
@@ -44,7 +48,7 @@ export async function renderHud(paths: OmgPaths): Promise<string> {
     '\x1b[1mPlan & Ralph:\x1b[0m',
     plan ? `  Plan progress: ${renderProgressBar(completedSteps, totalSteps)}` : '  Plan: none',
     activeStep ? `  Active step: ${activeStep.id} - ${activeStep.title}` : '',
-    ralph ? `  Ralph loop: ${(ralph.status ?? (ralph.active ? 'running' : 'idle'))} | phase: ${ralph.currentPhase} | iteration: ${ralph.iteration ?? '-'}${ralph.maxIterations ? `/${ralph.maxIterations}` : ''}` : '  Ralph: idle',
+    ralph ? `  Ralph loop: ${ralphStatus} | phase: ${ralphPhase} | iteration: ${ralphIteration}${ralphMaxIterations ? `/${ralphMaxIterations}` : ''}` : '  Ralph: idle',
     testSpec ? `  Test spec: ${testSpec.suites?.length ?? 0} suite(s)` : '',
     '',
   ];

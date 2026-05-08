@@ -202,7 +202,7 @@ export async function runRalph(paths: OmgPaths, task: string, options: RalphOpti
       const passed = verification.every((result) => result.code === 0);
       if (passed) {
         nextStep.status = 'completed';
-        decision = plan.steps.every((step) => step.id === nextStep.id || step.status === 'completed') ? 'continue' : 'continue';
+        decision = 'continue';
       } else if (ralphState.stepAttempts[nextStep.id] >= maxStepRetries && ralphState.stepAttempts[nextStep.id] <= maxStepRetries + 1) {
         ralphState.currentPhase = 'executing';
         const fixPrompt = `The step '${nextStep.title}' failed its verification commands repeatedly:\n\n${verification.map(v => `$ ${v.command}\n${v.stdout}\n${v.stderr}`).join('\n\n')}\n\nPlease act as a specialized debugger: analyze the failure, apply the necessary code changes to fix it, and return your summary.`;

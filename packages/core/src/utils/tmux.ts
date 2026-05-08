@@ -8,6 +8,9 @@ export interface TmuxHudOptions {
   mode?: string;
 }
 
+const STATUS_LEFT_MAX_LENGTH = 40;
+const STATUS_RIGHT_MAX_LENGTH = 100;
+
 export async function setupTmuxHud(options: TmuxHudOptions): Promise<void> {
   const user = options.user || process.env.USER || 'operator';
   const version = packageJson.version;
@@ -18,9 +21,9 @@ export async function setupTmuxHud(options: TmuxHudOptions): Promise<void> {
     ['set-option', 'status-interval', '2'],
     ['set-option', 'status-style', 'bg=black,fg=white'],
     ['set-option', 'status-left', statusLeft],
-    ['set-option', 'status-left-length', '40'],
+    ['set-option', 'status-left-length', String(STATUS_LEFT_MAX_LENGTH)],
     ['set-option', 'status-right', statusRight],
-    ['set-option', 'status-right-length', '100'],
+    ['set-option', 'status-right-length', String(STATUS_RIGHT_MAX_LENGTH)],
   ];
 
   for (const args of commands) {
