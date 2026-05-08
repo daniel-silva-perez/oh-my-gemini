@@ -3,8 +3,8 @@
 Workflow and runtime layer for Gemini CLI. Persistent project state, reusable workflows, and tmux-backed team execution.
 
 [![npm version](https://img.shields.io/npm/v/@danielsilvaperez/oh-my-gemini)](https://www.npmjs.com/package/@danielsilvaperez/oh-my-gemini)
-[![CI](https://github.com/danielsilvaperez/oh-my-gemini/actions/workflows/ci.yml/badge.svg)](https://github.com/danielsilvaperez/oh-my-gemini/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/danielsilvaperez/oh-my-gemini/blob/main/LICENSE)
+[![CI](https://github.com/daniel-silva-perez/oh-my-gemini/actions/workflows/ci.yml/badge.svg)](https://github.com/daniel-silva-perez/oh-my-gemini/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/daniel-silva-perez/oh-my-gemini/blob/main/LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
 
 ---
